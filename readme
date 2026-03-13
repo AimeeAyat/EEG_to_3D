@@ -16,24 +16,46 @@ EEG-based brain-computer interfaces (BCIs) have shown promise in various applica
 CATVis/
 ├── README.md
 ├── requirements.txt
+├── app.py                          # Full interactive Streamlit pipeline
+├── generate_sd_only.py             # Standalone Flux/SD image generation
+├── pixel2mesh_reconstruction.py    # Multi-view 3D mesh reconstruction
+├── render_mesh.py                  # Render meshes as paper-quality figures
+├── visualize_wonder3d_outputs.py   # Visualize Wonder3D 3D outputs
+├── eeg_timeseries_analysis.py      # EEG time-series analysis & plots
 ├── config/
 │   └── config.yaml
 ├── data/
 │   └── README.md (instructions for data placement)
+├── figures/
+│   ├── methodology.png
+│   ├── architecture.png
+│   └── gen_samples.jpg
+├── Wonder3D/                       # Cloned externally (see step 6 below)
+├── outputs/
+│   ├── meshes/                     # Reconstructed 3D meshes
+│   ├── mesh_360/                   # 360° mesh GIF animations
+│   ├── eeg_360/                    # 360° EEG concept GIFs
+│   ├── eeg_timeseries/             # EEG time-series visualizations
+│   ├── streamlit_runs/             # Outputs from app.py runs
+│   └── wonder3d_visualizations/    # Wonder3D multi-view renders
 ├── src/
 │   ├── __init__.py
 │   ├── data/
 │   │   ├── __init__.py
 │   │   ├── data_loader.py
-│   │   └── preprocessor.py
+│   │   ├── preprocessor.py
+│   │   └── augmentation.py
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── eeg_classifier.py
-│   │   └── contrastive_encoder.py
+│   │   ├── contrastive_encoder.py
+│   │   └── improved_encoder.py
 │   ├── training/
 │   │   ├── __init__.py
 │   │   ├── train_classifier.py
-│   │   └── train_contrastive.py
+│   │   ├── train_contrastive.py
+│   │   ├── train_improved.py
+│   │   └── improved_contrastive_loss.py
 │   ├── pipeline/
 │   │   ├── __init__.py
 │   │   ├── image_generator.py
@@ -45,17 +67,22 @@ CATVis/
 │   ├── train_eeg_classifier.py
 │   ├── train_contrastive_model.py
 │   ├── run_pipeline.py
-│   └── evaluate_results.py
+│   ├── evaluate_results.py
+│   └── cleanup.py
 └── checkpoints/
-    └── README.md
 ```
 
 ## Pipeline Overview
 
 1. **EEG Classification**: Train EEGConformer model for 40-class classification
-2. **Contrastive Alignment**: Train EEG-text alignment using CLIP embeddings  
+2. **Contrastive Alignment**: Train EEG-text alignment using CLIP embeddings
 3. **Image Generation**: Use trained models in Stable Diffusion pipeline
 4. **Evaluation**: Compute metrics (FID, IS, Classification Accuracy)
+5. **Cleanup**: Remove generated outputs and checkpoints
+6. **3D Reconstruction**: Generate multi-view images via Wonder3D and reconstruct meshes
+7. **Flux Generation**: Standalone high-quality image generation with Flux model
+8. **Interactive App**: End-to-end pipeline with Streamlit UI
+9. **3D Visualization**: Render and animate Wonder3D outputs
 
 ## Setup Instructions
 
@@ -156,18 +183,35 @@ python scripts/train_eeg_classifier.py --config custom_config.yaml
 
 [Research Paper](https://link.springer.com/chapter/10.1007/978-3-032-04927-8_10)
 
-### 6. Download wonder3d github repo inside Catvis pipeline
+### 6. Set Up Wonder3D (3D Reconstruction)
+
+Clone the Wonder3D repo inside the CATVis directory:
+
+```bash
 git clone https://github.com/xxlong0/Wonder3D.git
+```
 
-### 7. Generate image with Flux model
+Then reconstruct meshes from Wonder3D multi-view outputs:
 
+```bash
+python pixel2mesh_reconstruction.py
+python render_mesh.py
+```
+
+### 7. Generate Images with Flux Model
+
+```bash
 python generate_sd_only.py
+```
 
-### 8. to see full running pipeline 
+### 8. Run Full Interactive Pipeline
 
-python app.py
+```bash
+streamlit run app.py
+```
 
-### 9. To visualize 3D outputs of generated images run 
+### 9. Visualize 3D Outputs
 
+```bash
 python visualize_wonder3d_outputs.py
-
+```
